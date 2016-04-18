@@ -19,6 +19,8 @@ parser.add_option("-d", "--db", dest="database", default="analytics_raw")
 
 parser.add_option("-u", dest="username", default=os.getlogin())
 
+parser.add_option("--no_headers", dest="headers", default=True, action="store_false")
+
 (options, args) = parser.parse_args()
 
 if not options.query_filename:
@@ -52,5 +54,7 @@ with vertica_python.connect(**conn_info) as connection:
     query = open(options.query_filename).read()
     cur = connection.cursor()
     cur.execute(query)
+    if options.headers:
+      writer.writerow([d.name for d in cur.description])
     for row in cur.iterate():
       writer.writerow(row)
